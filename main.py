@@ -180,37 +180,61 @@ def send_to_webhook(alert_val):
     
     requests.post(config['webhook_url'], data=json.dumps(payload), headers=headers)
 
+def get_version_number():
+    version_url = "https://raw.githubusercontent.com/Kokuen0245/VisionismMacro/main/version.txt"
+
+    try:
+        response = requests.get(version_url)
+        
+        if response.status_code == 200:
+            version_number = response.text.strip()
+            return version_number
+        else:
+            print(f"Failed to fetch version file. Status code: {response.status_code}")
+            return None
+    except Exception as e:
+        print(f"Error fetching version file: {e}")
+        return None
+
+# Setup
+version = get_version_number()
+
 # UI
 root = tk.Tk()
 
-root.title("Farm Automation")
+root.title("Visionism Macro | " + version)
 root.geometry("500x300")
 
 tab_control = ttk.Notebook(root)
-tab1 = ttk.Frame(tab_control)
-tab2 = ttk.Frame(tab_control)
-tab3 = ttk.Frame(tab_control)
+main = ttk.Frame(tab_control)
+watcher = ttk.Frame(tab_control)
+webhook = ttk.Frame(tab_control)
+credits = ttk.Frame(tab_control)
 
-tab_control.add(tab1, text="Main")
-tab_control.add(tab2, text="Watcher")
-tab_control.add(tab3, text="Webhook")
+tab_control.add(main, text="Main")
+tab_control.add(watcher, text="Watcher")
+tab_control.add(webhook, text="Webhook")
+tab_control.add(credits, text="Credits")
 
 fatigue_watcher_var = tk.BooleanVar()
 
 farm_type_var = tk.StringVar()
-farm_type_label = ttk.Label(tab1, text="Choose Farm Type:")
-farm_type_combo = ttk.Combobox(tab1, textvariable=farm_type_var, values=["stam", "speed", "pullup", "bench"])
-start_button = ttk.Button(tab1, text="Start Farm", command=start_farm)
-stop_button = ttk.Button(tab1, text="Stop Farm", command=stop_farm)
+farm_type_label = ttk.Label(main, text="Choose Farm Type:")
+farm_type_combo = ttk.Combobox(main, textvariable=farm_type_var, values=["stam", "speed", "pullup", "bench"])
+start_button = ttk.Button(main, text="Start Farm", command=start_farm)
+stop_button = ttk.Button(main, text="Stop Farm", command=stop_farm)
 
-fatigue_checkbox = ttk.Checkbutton(tab2, text="Watch Fatigue", variable=fatigue_watcher_var)
-start_fatigue_button = ttk.Button(tab2, text="Start Watcher", command=start_fatigue_watcher)
-stop_fatigue_button = ttk.Button(tab2, text="Stop Watcher", command=stop_fatigue_watcher)
+fatigue_checkbox = ttk.Checkbutton(watcher, text="Watch Fatigue", variable=fatigue_watcher_var)
+start_fatigue_button = ttk.Button(watcher, text="Start Watcher", command=start_fatigue_watcher)
+stop_fatigue_button = ttk.Button(watcher, text="Stop Watcher", command=stop_fatigue_watcher)
 
-webhook_label = ttk.Label(tab3, text="Discord Webhook URL:")
-webhook_entry = ttk.Entry(tab3)
-save_button = ttk.Button(tab3, text="Save", command=lambda: save_webhook(webhook_entry.get()))
-test_button = ttk.Button(tab3, text="Test Webhook", command=lambda: test_webook())
+webhook_label = ttk.Label(webhook, text="Discord Webhook URL:")
+webhook_entry = ttk.Entry(webhook)
+save_button = ttk.Button(webhook, text="Save", command=lambda: save_webhook(webhook_entry.get()))
+test_button = ttk.Button(webhook, text="Test Webhook", command=lambda: test_webook())
+
+credit_label_1 = ttk.Label(credits, text="Created by kokuen_.")
+credit_label_2 = ttk.Label(credits, text="Tested by rust3631")
 
 farm_type_label.pack(pady=10)
 farm_type_combo.pack(pady=5)
@@ -225,6 +249,9 @@ webhook_label.pack(pady=10)
 webhook_entry.pack(pady=5)
 save_button.pack(pady=5)
 test_button.pack(pady=5)
+
+credit_label_1.pack(pady=5)
+credit_label_2.pack(pady=5)
 
 tab_control.pack(expand=1, fill="both")
 
