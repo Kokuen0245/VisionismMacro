@@ -17,6 +17,7 @@ key_paths = {"W": "assets/W.png", "A": "assets/A.png", "S": "assets/S.png", "D":
 speed_button_path = "assets/speedButton.png"
 stam_button_path = "assets/stamButton.png"
 start_button_path = "assets/startButton.png"
+hold_e_button_path = "assets/holdEButton.png"
 cooldown_period = 1.8
 last_pressed_timestamps = {key: 0 for key in keys}
 active_farm = None
@@ -50,6 +51,15 @@ def click_start_button():
     except Exception as e:
         print(f"Error in click_start_button: {e}")
 
+def get_on_training():
+    try:
+        hold_e_button_location = pyautogui.locateCenterOnScreen(hold_e_button_path)
+        if hold_e_button_location:
+            hold_key(e, 2)
+            print("Got on training.")
+    except Exception as e:
+        print(f"Error in click_start_button: {e}")
+
 def detect_and_press_keys():
     screenshot = pyautogui.screenshot()
     screenshot = np.array(screenshot)
@@ -72,6 +82,11 @@ def detect_and_press_keys():
             print(f"Pressed key {key}")
             last_pressed_timestamps[key] = current_time
 
+def hold_key(key, duration):
+    keyboard.press(key)
+    time.sleep(duration)
+    keyboard.release(key)
+
 def start_farm():
     global active_farm
     active_farm = farm_type_var.get()
@@ -86,6 +101,7 @@ def stop_farm():
 def automate_farm():
     while active_farm:
         try:
+            get_on_training()
             if active_farm == "stam":
                 click_stam_button()
             elif active_farm == "speed":
@@ -168,6 +184,10 @@ def send_to_webhook(alert_val):
     if alert_val == "fatigue":
         payload = {
             "content": "@everyone\nFatigue is over 70%."
+        }
+    elif alert_val == "combat":
+        payload = {
+            "content": "@everyone\nYou are in combat."
         }
     else:
         payload = {
