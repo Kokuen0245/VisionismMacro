@@ -16,7 +16,7 @@ keys = ['W', 'A', 'S', 'D']
 key_paths = {"W": "assets/W.png", "A": "assets/A.png", "S": "assets/S.png", "D": "assets/D.png"}
 speed_button_path = "assets/speedButton.png"
 stam_button_path = "assets/stamButton.png"
-stat_start_button_path = "assets/startButton.png"
+start_button_path = "assets/startButton.png"
 hold_e_button_path = "assets/holdEButton.png"
 cooldown_period = 1.8
 last_pressed_timestamps = {key: 0 for key in keys}
@@ -45,14 +45,14 @@ def click_speed_button():
     except Exception as e:
         print(f"Error in click_speed_button: {e}")
 
-def click_stat_start_button():
+def click_start_button():
     try:
-        stat_start_button_location = pyautogui.locateCenterOnScreen(stat_start_button_path)
-        if stat_start_button_location:
-            pyautogui.click(stat_start_button_location)
+        start_button_location = pyautogui.locateCenterOnScreen(start_button_path)
+        if start_button_location:
+            pyautogui.click(start_button_location)
             print("Clicked start.")
     except Exception as e:
-        print(f"Error in click_stat_start_button: {e}")
+        print(f"Error in click_start_button: {e}")
 
 def get_on_training():
     try:
@@ -61,7 +61,7 @@ def get_on_training():
             hold_key(e, 2)
             print("Got on training.")
     except Exception as e:
-        print(f"Error in click_stat_start_button: {e}")
+        print(f"Error in get_on_training: {e}")
 
 def detect_and_press_keys():
     screenshot = pyautogui.screenshot()
@@ -121,7 +121,7 @@ def automate_stat_farm():
             elif active_stat_farm == "speed":
                 click_speed_button()
             elif active_stat_farm == "pullup" or active_stat_farm == "bench":
-                click_stat_start_button()
+                click_start_button()
             detect_and_press_keys()
         except Exception as e:
             print(f"Error: {e}")
