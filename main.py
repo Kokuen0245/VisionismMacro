@@ -131,15 +131,15 @@ def stop_job_farm():
 
 def automate_stat_farm_main():
     if active_stat_farm == "stam":
-        get_on_training()
+        #get_on_training()
         click_stam_button()
         detect_and_press_keys()
     elif active_stat_farm == "speed":
-        get_on_training()
+        #get_on_training()
         click_speed_button()
         detect_and_press_keys()
     elif active_stat_farm == "pullup" or active_stat_farm == "bench":
-        get_on_training()
+        #get_on_training()
         click_start_button()
         detect_and_press_keys()
 
