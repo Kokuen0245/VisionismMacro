@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 from threading import Thread
 import time
+import webbrowser
 import cv2
 import numpy as np
 import pyautogui
@@ -12,6 +14,7 @@ import requests
 
 # Global variables
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract\\tesseract.exe'
+scriptVersion = 1.6
 keys = ['W', 'A', 'S', 'D']
 key_paths = {"W": "assets/W.png", "A": "assets/A.png", "S": "assets/S.png", "D": "assets/D.png"}
 speed_button_path = "assets/speedButton.png"
@@ -33,6 +36,8 @@ def click_stam_button():
         if stam_button_location:
             pyautogui.click(stam_button_location)
             print("Clicked stamina.")
+        else:
+            return
     except Exception as e:
         print(f"Error in click_stam_button: {e}")
 
@@ -42,6 +47,8 @@ def click_speed_button():
         if speed_button_location:
             pyautogui.click(speed_button_location)
             print("Clicked speed.")
+        else:
+            return
     except Exception as e:
         print(f"Error in click_speed_button: {e}")
 
@@ -51,14 +58,17 @@ def click_start_button():
         if start_button_location:
             pyautogui.click(start_button_location)
             print("Clicked start.")
+        else:
+            return
     except Exception as e:
         print(f"Error in click_start_button: {e}")
 
 def get_on_training():
     try:
         hold_e_button_location = pyautogui.locateCenterOnScreen(hold_e_button_path)
+        print(hold_e_button_location)
         if hold_e_button_location:
-            hold_key(e, 2)
+            hold_key("e", 2)
             print("Got on training.")
     except Exception as e:
         print(f"Error in get_on_training: {e}")
@@ -112,17 +122,24 @@ def stop_job_farm():
     global active_job_farm
     active_job_farm = None
 
+def automate_stat_farm_main():
+    if active_stat_farm == "stam":
+        get_on_training()
+        click_stam_button()
+        detect_and_press_keys()
+    elif active_stat_farm == "speed":
+        get_on_training()
+        click_speed_button()
+        detect_and_press_keys()
+    elif active_stat_farm == "pullup" or active_stat_farm == "bench":
+        get_on_training()
+        click_start_button()
+        detect_and_press_keys()
+
 def automate_stat_farm():
     while active_stat_farm:
         try:
-            get_on_training()
-            if active_stat_farm == "stam":
-                click_stam_button()
-            elif active_stat_farm == "speed":
-                click_speed_button()
-            elif active_stat_farm == "pullup" or active_stat_farm == "bench":
-                click_start_button()
-            detect_and_press_keys()
+            automate_stat_farm_main()
         except Exception as e:
             print(f"Error: {e}")
 
@@ -161,7 +178,7 @@ def watcher_function():
             
             if fatigue_value is not None:
                 fatigue_value = float(fatigue_value)
-                if fatigue_value >= 70 and not has_insomnia:
+                if fatigue_value >= 62 and not has_insomnia:
                     send_to_webhook("fatigue")
                 elif fatigue_value >= 82 and has_insomnia:
                     send_to_webhook("fatigue")
@@ -269,6 +286,17 @@ def get_version_number():
     except Exception as e:
         print(f"Error fetching version file: {e}")
         return None
+    
+def check_version():
+    version = get_version_number()
+
+    if version >= scriptVersion:
+        root.withdraw()
+        messagebox.show("You are currently running the wrong version, please get the new script.")
+        exit()
+    
+def join_discord():
+    webbrowser.open("https://discord.gg/5awP7cfxPa")
 
 # Setup
 version = get_version_number()
@@ -323,6 +351,7 @@ delete_button = ttk.Button(webhook, text="Delete Webhook", command=lambda: delet
 
 credit_label_1 = ttk.Label(credits, text="Created by kokuen_.")
 credit_label_2 = ttk.Label(credits, text="Tested by rust3631")
+join_discord_button = ttk.Button(credits, text="Join Discord", command=join_discord)
 
 stat_type_label.pack(pady=10)
 stat_type_combo.pack(pady=5)
@@ -349,6 +378,7 @@ delete_button.pack(pady=5)
 
 credit_label_1.pack(pady=5)
 credit_label_2.pack(pady=5)
+join_discord_button.pack(pady=5)
 
 tab_control.pack(expand=1, fill="both")
 
