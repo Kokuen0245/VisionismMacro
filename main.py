@@ -22,6 +22,8 @@ cooldown_period = 1.8
 last_pressed_timestamps = {key: 0 for key in keys}
 active_farm = None
 watch_fatigue = False
+watch_combat = False
+has_insomnia = False
 
 # Functions
 def click_stam_button():
@@ -112,18 +114,24 @@ def automate_farm():
         except Exception as e:
             print(f"Error: {e}")
 
-def start_fatigue_watcher():
+def start_watcher():
     global watch_fatigue
+    global watch_combat
+    global has_insomnia
     watch_fatigue = fatigue_watcher_var.get()
-    fatigue_thread = Thread(target=watch_fatigue_function)
-    fatigue_thread.daemon = True
-    fatigue_thread.start()
+    watch_combat = combat_watcher_var.get()
+    has_insomnia = has_insomnia_var.get()
+    watcher_thread = Thread(target=watcher_function)
+    watcher_thread.daemon = True
+    watcher_thread.start()
 
-def stop_fatigue_watcher():
+def stop_watcher():
     global watch_fatigue
+    global watch_combat
     watch_fatigue = False
+    watch_combat = False
 
-def watch_fatigue_function():
+def watcher_function():
     while watch_fatigue:
         try:
             screenshot = pyautogui.screenshot()
@@ -136,12 +144,29 @@ def watch_fatigue_function():
             if "Fatigue" in fatigue_text:
                 fatigue_value = fatigue_text.split("Fatigue: ")[1].split("%")[0]
             
-            if fatigue_value >= "70":
-                send_to_webhook("fatigue")
+            if fatigue_value is not None:
+                fatigue_value = float(fatigue_value)
+                if fatigue_value >= 70 and not has_insomnia:
+                    send_to_webhook("fatigue")
+                elif fatigue_value >= 82 and has_insomnia:
+                    send_to_webhook("fatigue")
 
             time.sleep(5)
         except Exception as e:
             print(f"Error in fatigue watcher: {e}")
+    while watch_combat:
+        try:
+            screenshot = pyautogui.screenshot()
+            screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+
+            combat_tag = pytesseract.image_to_string(screenshot)
+
+            if "COMBAT" in combat_tag:
+                send_to_webhook("combat")
+
+            time.sleep(5)
+        except Exception as e:
+            print(f"Error in combat watcher: {e}")
 
 def save_webhook(url):
     try:
@@ -173,6 +198,20 @@ def test_webook():
     }
 
     requests.post(config['webhook_url'], data=json.dumps(payload), headers=headers)
+
+def delete_webhook():
+    try:
+        with open('config.json', 'r') as f:
+            config = json.load(f)
+    except FileNotFoundError:
+        config = {"webhook_url": "null"}
+
+    config['webhook_url'] = "null"
+
+    with open('config.json', 'w') as f:
+        json.dump(config, f)
+
+    print("Webhook successfully deleted")
 
 def send_to_webhook(alert_val):
     try:
@@ -237,6 +276,8 @@ tab_control.add(webhook, text="Webhook")
 tab_control.add(credits, text="Credits")
 
 fatigue_watcher_var = tk.BooleanVar()
+combat_watcher_var = tk.BooleanVar()
+has_insomnia_var = tk.BooleanVar()
 
 farm_type_var = tk.StringVar()
 farm_type_label = ttk.Label(main, text="Choose Farm Type:")
@@ -245,13 +286,17 @@ start_button = ttk.Button(main, text="Start Farm", command=start_farm)
 stop_button = ttk.Button(main, text="Stop Farm", command=stop_farm)
 
 fatigue_checkbox = ttk.Checkbutton(watcher, text="Watch Fatigue", variable=fatigue_watcher_var)
-start_fatigue_button = ttk.Button(watcher, text="Start Watcher", command=start_fatigue_watcher)
-stop_fatigue_button = ttk.Button(watcher, text="Stop Watcher", command=stop_fatigue_watcher)
+combat_checkbox = ttk.Checkbutton(watcher, text="Watch Combat Tag", variable=combat_watcher_var)
+start_watcher_button = ttk.Button(watcher, text="Start Watcher", command=start_watcher)
+stop_watcher_button = ttk.Button(watcher, text="Stop Watcher", command=stop_watcher)
+modification_label = ttk.Label(watcher, text="Modifications for watcher:")
+insomnia_checkbox = ttk.Checkbutton(watcher, text="Has Insomnia", variable=has_insomnia_var)
 
 webhook_label = ttk.Label(webhook, text="Discord Webhook URL:")
 webhook_entry = ttk.Entry(webhook)
 save_button = ttk.Button(webhook, text="Save", command=lambda: save_webhook(webhook_entry.get()))
 test_button = ttk.Button(webhook, text="Test Webhook", command=lambda: test_webook())
+delete_button = ttk.Button(webhook, text="Delete Webhook", command=lambda: delete_webhook())
 
 credit_label_1 = ttk.Label(credits, text="Created by kokuen_.")
 credit_label_2 = ttk.Label(credits, text="Tested by rust3631")
@@ -262,13 +307,17 @@ start_button.pack(pady=5)
 stop_button.pack(pady=5)
 
 fatigue_checkbox.pack(pady=5)
-start_fatigue_button.pack(pady=5)
-stop_fatigue_button.pack(pady=5)
+combat_checkbox.pack(pady=5)
+start_watcher_button.pack(pady=5)
+stop_watcher_button.pack(pady=5)
+modification_label.pack(pady=10)
+insomnia_checkbox.pack(pady=5)
 
 webhook_label.pack(pady=10)
 webhook_entry.pack(pady=5)
 save_button.pack(pady=5)
 test_button.pack(pady=5)
+delete_button.pack(pady=5)
 
 credit_label_1.pack(pady=5)
 credit_label_2.pack(pady=5)
