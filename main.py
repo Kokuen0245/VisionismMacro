@@ -21,7 +21,7 @@ hold_e_button_path = "assets/holdEButton.png"
 cooldown_period = 1.8
 last_pressed_timestamps = {key: 0 for key in keys}
 active_stat_farm = None
-active_money_farm = None
+active_job_farm = None
 watch_fatigue = False
 watch_combat = False
 has_insomnia = False
@@ -101,16 +101,16 @@ def stop_stat_farm():
     global active_stat_farm
     active_stat_farm = None
 
-def start_money_farm():
-    global active_money_farm
-    active_money_farm = money_type_var.get()
-    money_farm_thread = Thread(target=automate_money_farm)
-    money_farm_thread.daemon = True
-    money_farm_thread.start()
+def start_job_farm():
+    global active_job_farm
+    active_job_farm = job_type_var.get()
+    job_farm_thread = Thread(target=automate_job_farm)
+    job_farm_thread.daemon = True
+    job_farm_thread.start()
 
-def stop_money_farm():
-    global active_money_farm
-    active_money_farm = None
+def stop_job_farm():
+    global active_job_farm
+    active_job_farm = None
 
 def automate_stat_farm():
     while active_stat_farm:
@@ -126,7 +126,7 @@ def automate_stat_farm():
         except Exception as e:
             print(f"Error: {e}")
 
-def automate_money_farm():
+def automate_job_farm():
     print('idk bro')
 
 def start_watcher():
@@ -281,13 +281,13 @@ root.geometry("500x300")
 
 tab_control = ttk.Notebook(root)
 stat_auto = ttk.Frame(tab_control)
-money_auto = ttk.Frame(tab_control)
+job_auto = ttk.Frame(tab_control)
 watcher = ttk.Frame(tab_control)
 webhook = ttk.Frame(tab_control)
 credits = ttk.Frame(tab_control)
 
 tab_control.add(stat_auto, text="Stat Automation")
-tab_control.add(money_auto, text="Money Automation")
+tab_control.add(job_auto, text="Job Automation")
 tab_control.add(watcher, text="Watcher")
 tab_control.add(webhook, text="Webhook")
 tab_control.add(credits, text="Credits")
@@ -302,11 +302,11 @@ stat_type_combo = ttk.Combobox(stat_auto, textvariable=stat_type_var, values=["s
 stat_start_button = ttk.Button(stat_auto, text="Start Farm", command=start_stat_farm)
 stat_stop_button = ttk.Button(stat_auto, text="Stop Farm", command=stop_stat_farm)
 
-money_type_var = tk.StringVar()
-money_type_label = ttk.Label(money_auto, text="Choose Farm Type:")
-money_type_combo = ttk.Combobox(money_auto, textvariable=money_type_var, values=["Macro Based", "AI Based"])
-money_start_button = ttk.Button(money_auto, text="Start Farm", command=start_money_farm)
-money_stop_button = ttk.Button(money_auto, text="Stop Farm", command=stop_money_farm)
+job_type_var = tk.StringVar()
+job_type_label = ttk.Label(job_auto, text="Choose Farm Type:")
+job_type_combo = ttk.Combobox(job_auto, textvariable=job_type_var, values=["Macro Based", "AI Based"])
+job_start_button = ttk.Button(job_auto, text="Start Farm", command=start_job_farm)
+job_stop_button = ttk.Button(job_auto, text="Stop Farm", command=stop_job_farm)
 
 fatigue_checkbox = ttk.Checkbutton(watcher, text="Watch Fatigue", variable=fatigue_watcher_var)
 combat_checkbox = ttk.Checkbutton(watcher, text="Watch Combat Tag", variable=combat_watcher_var)
@@ -329,10 +329,10 @@ stat_type_combo.pack(pady=5)
 stat_start_button.pack(pady=5)
 stat_stop_button.pack(pady=5)
 
-money_type_label.pack(pady=10)
-money_type_combo.pack(pady=5)
-money_start_button.pack(pady=5)
-money_stop_button.pack(pady=5)
+job_type_label.pack(pady=10)
+job_type_combo.pack(pady=5)
+job_start_button.pack(pady=5)
+job_stop_button.pack(pady=5)
 
 fatigue_checkbox.pack(pady=5)
 combat_checkbox.pack(pady=5)
