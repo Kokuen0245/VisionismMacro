@@ -15,9 +15,9 @@ import win32gui
 
 # Global variables
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract\\tesseract.exe'
-scriptVersion = 1.6
-keys = ['W', 'A', 'S', 'D']
-key_paths = {"W": "assets/W.png", "A": "assets/A.png", "S": "assets/S.png", "D": "assets/D.png"}
+scriptVersion = 1.7
+keys = ['w', 'a', 's', 'd']
+key_paths = {"w": "assets/w.png", "a": "assets/a.png", "s": "assets/s.png", "d": "assets/d.png"}
 speed_button_path = "assets/speedButton.png"
 stam_button_path = "assets/stamButton.png"
 start_button_path = "assets/startButton.png"
@@ -301,7 +301,9 @@ def find_window():
         print(f"Roblox window not found.")
         return None
     
-def capture_screenshot(hwnd):
+def capture_screenshot():
+    hwnd = find_window()
+
     rect = win32gui.GetWindowRect(hwnd)
     left, top, right, bottom = rect
     width = right - left
