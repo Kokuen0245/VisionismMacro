@@ -16,11 +16,12 @@ keys = ['W', 'A', 'S', 'D']
 key_paths = {"W": "assets/W.png", "A": "assets/A.png", "S": "assets/S.png", "D": "assets/D.png"}
 speed_button_path = "assets/speedButton.png"
 stam_button_path = "assets/stamButton.png"
-start_button_path = "assets/startButton.png"
+stat_start_button_path = "assets/startButton.png"
 hold_e_button_path = "assets/holdEButton.png"
 cooldown_period = 1.8
 last_pressed_timestamps = {key: 0 for key in keys}
-active_farm = None
+active_stat_farm = None
+active_money_farm = None
 watch_fatigue = False
 watch_combat = False
 has_insomnia = False
@@ -44,14 +45,14 @@ def click_speed_button():
     except Exception as e:
         print(f"Error in click_speed_button: {e}")
 
-def click_start_button():
+def click_stat_start_button():
     try:
-        start_button_location = pyautogui.locateCenterOnScreen(start_button_path)
-        if start_button_location:
-            pyautogui.click(start_button_location)
+        stat_start_button_location = pyautogui.locateCenterOnScreen(stat_start_button_path)
+        if stat_start_button_location:
+            pyautogui.click(stat_start_button_location)
             print("Clicked start.")
     except Exception as e:
-        print(f"Error in click_start_button: {e}")
+        print(f"Error in click_stat_start_button: {e}")
 
 def get_on_training():
     try:
@@ -60,7 +61,7 @@ def get_on_training():
             hold_key(e, 2)
             print("Got on training.")
     except Exception as e:
-        print(f"Error in click_start_button: {e}")
+        print(f"Error in click_stat_start_button: {e}")
 
 def detect_and_press_keys():
     screenshot = pyautogui.screenshot()
@@ -89,30 +90,44 @@ def hold_key(key, duration):
     time.sleep(duration)
     keyboard.release(key)
 
-def start_farm():
-    global active_farm
-    active_farm = farm_type_var.get()
-    farm_thread = Thread(target=automate_farm)
-    farm_thread.daemon = True
-    farm_thread.start()
+def start_stat_farm():
+    global active_stat_farm
+    active_stat_farm = stat_type_var.get()
+    stat_farm_thread = Thread(target=automate_stat_farm)
+    stat_farm_thread.daemon = True
+    stat_farm_thread.start()
 
-def stop_farm():
-    global active_farm
-    active_farm = None
+def stop_stat_farm():
+    global active_stat_farm
+    active_stat_farm = None
 
-def automate_farm():
-    while active_farm:
+def start_money_farm():
+    global active_money_farm
+    active_money_farm = money_type_var.get()
+    money_farm_thread = Thread(target=automate_money_farm)
+    money_farm_thread.daemon = True
+    money_farm_thread.start()
+
+def stop_money_farm():
+    global active_money_farm
+    active_money_farm = None
+
+def automate_stat_farm():
+    while active_stat_farm:
         try:
             get_on_training()
-            if active_farm == "stam":
+            if active_stat_farm == "stam":
                 click_stam_button()
-            elif active_farm == "speed":
+            elif active_stat_farm == "speed":
                 click_speed_button()
-            elif active_farm == "pullup" or active_farm == "bench":
-                click_start_button()
+            elif active_stat_farm == "pullup" or active_stat_farm == "bench":
+                click_stat_start_button()
             detect_and_press_keys()
         except Exception as e:
             print(f"Error: {e}")
+
+def automate_money_farm():
+    print('idk bro')
 
 def start_watcher():
     global watch_fatigue
@@ -265,12 +280,14 @@ root.title("Visionism Macro | " + version)
 root.geometry("500x300")
 
 tab_control = ttk.Notebook(root)
-main = ttk.Frame(tab_control)
+stat_auto = ttk.Frame(tab_control)
+money_auto = ttk.Frame(tab_control)
 watcher = ttk.Frame(tab_control)
 webhook = ttk.Frame(tab_control)
 credits = ttk.Frame(tab_control)
 
-tab_control.add(main, text="Main")
+tab_control.add(stat_auto, text="Stat Automation")
+tab_control.add(money_auto, text="Money Automation")
 tab_control.add(watcher, text="Watcher")
 tab_control.add(webhook, text="Webhook")
 tab_control.add(credits, text="Credits")
@@ -279,11 +296,17 @@ fatigue_watcher_var = tk.BooleanVar()
 combat_watcher_var = tk.BooleanVar()
 has_insomnia_var = tk.BooleanVar()
 
-farm_type_var = tk.StringVar()
-farm_type_label = ttk.Label(main, text="Choose Farm Type:")
-farm_type_combo = ttk.Combobox(main, textvariable=farm_type_var, values=["stam", "speed", "pullup", "bench"])
-start_button = ttk.Button(main, text="Start Farm", command=start_farm)
-stop_button = ttk.Button(main, text="Stop Farm", command=stop_farm)
+stat_type_var = tk.StringVar()
+stat_type_label = ttk.Label(stat_auto, text="Choose Farm Type:")
+stat_type_combo = ttk.Combobox(stat_auto, textvariable=stat_type_var, values=["stam", "speed", "pullup", "bench"])
+stat_start_button = ttk.Button(stat_auto, text="Start Farm", command=start_stat_farm)
+stat_stop_button = ttk.Button(stat_auto, text="Stop Farm", command=stop_stat_farm)
+
+money_type_var = tk.StringVar()
+money_type_label = ttk.Label(money_auto, text="Choose Farm Type:")
+money_type_combo = ttk.Combobox(money_auto, textvariable=money_type_var, values=["Macro Based", "AI Based"])
+money_start_button = ttk.Button(money_auto, text="Start Farm", command=start_money_farm)
+money_stop_button = ttk.Button(money_auto, text="Stop Farm", command=stop_money_farm)
 
 fatigue_checkbox = ttk.Checkbutton(watcher, text="Watch Fatigue", variable=fatigue_watcher_var)
 combat_checkbox = ttk.Checkbutton(watcher, text="Watch Combat Tag", variable=combat_watcher_var)
@@ -301,10 +324,15 @@ delete_button = ttk.Button(webhook, text="Delete Webhook", command=lambda: delet
 credit_label_1 = ttk.Label(credits, text="Created by kokuen_.")
 credit_label_2 = ttk.Label(credits, text="Tested by rust3631")
 
-farm_type_label.pack(pady=10)
-farm_type_combo.pack(pady=5)
-start_button.pack(pady=5)
-stop_button.pack(pady=5)
+stat_type_label.pack(pady=10)
+stat_type_combo.pack(pady=5)
+stat_start_button.pack(pady=5)
+stat_stop_button.pack(pady=5)
+
+money_type_label.pack(pady=10)
+money_type_combo.pack(pady=5)
+money_start_button.pack(pady=5)
+money_stop_button.pack(pady=5)
 
 fatigue_checkbox.pack(pady=5)
 combat_checkbox.pack(pady=5)
