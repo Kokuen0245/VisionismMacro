@@ -4,3 +4,4 @@ pyautogui
 keyboard
 pytesseract
 requests
+pywin32
