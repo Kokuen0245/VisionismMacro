@@ -102,10 +102,16 @@ def hold_key(key, duration):
 
 def start_stat_farm():
     global active_stat_farm
+    global cooldown_period
     active_stat_farm = stat_type_var.get()
-    stat_farm_thread = Thread(target=automate_stat_farm)
-    stat_farm_thread.daemon = True
-    stat_farm_thread.start()
+    cooldown_period = get_cooldown()
+
+    if cooldown_period is not None:
+        stat_farm_thread = Thread(target=automate_stat_farm)
+        stat_farm_thread.daemon = True
+        stat_farm_thread.start()
+    else:
+        return
 
 def stop_stat_farm():
     global active_stat_farm
@@ -271,6 +277,22 @@ def send_to_webhook(alert_val):
     
     requests.post(config['webhook_url'], data=json.dumps(payload), headers=headers)
 
+def validate_cooldown(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+    
+def get_cooldown():
+    value = stat_delay_entry.get()
+    if validate_cooldown(value):
+        return float(value)
+    else:
+        messagebox.showerror("Error", "Please enter a valid cooldown. Example: 1.5")
+        return None
+        
+
 def get_version_number():
     version_url = "https://raw.githubusercontent.com/Kokuen0245/VisionismMacro/main/version.txt"
 
@@ -327,8 +349,13 @@ has_insomnia_var = tk.BooleanVar()
 stat_type_var = tk.StringVar()
 stat_type_label = ttk.Label(stat_auto, text="Choose Farm Type:")
 stat_type_combo = ttk.Combobox(stat_auto, textvariable=stat_type_var, values=["stam", "speed", "pullup", "bench"])
+stat_delay_label = ttk.Label(stat_auto, text="Enter your cooldown:")
+stat_delay_entry = tk.Entry(stat_auto)
 stat_start_button = ttk.Button(stat_auto, text="Start Farm", command=start_stat_farm)
 stat_stop_button = ttk.Button(stat_auto, text="Stop Farm", command=stop_stat_farm)
+
+validate_cooldown_cmd = root.register(validate_cooldown)
+stat_delay_entry.config(validate="key", validatecommand=(validate_cooldown_cmd, "%P"))
 
 job_type_var = tk.StringVar()
 job_type_label = ttk.Label(job_auto, text="Choose Farm Type:")
@@ -355,6 +382,8 @@ join_discord_button = ttk.Button(credits, text="Join Discord", command=join_disc
 
 stat_type_label.pack(pady=10)
 stat_type_combo.pack(pady=5)
+stat_delay_label.pack(pady=10)
+stat_delay_entry.pack(pady=5)
 stat_start_button.pack(pady=5)
 stat_stop_button.pack(pady=5)
 
