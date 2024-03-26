@@ -11,6 +11,7 @@ import keyboard
 import json
 import pytesseract
 import requests
+import win32gui
 
 # Global variables
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract\\tesseract.exe'
@@ -74,7 +75,7 @@ def get_on_training():
         print(f"Error in get_on_training: {e}")
 
 def detect_and_press_keys():
-    screenshot = pyautogui.screenshot()
+    screenshot = capture_screenshot()
     screenshot = np.array(screenshot)
     screenshot_gray = cv2.cvtColor(screenshot, cv2.COLOR_RGB2GRAY)
 
@@ -172,7 +173,7 @@ def stop_watcher():
 def watcher_function():
     while watch_fatigue:
         try:
-            screenshot = pyautogui.screenshot()
+            screenshot = capture_screenshot()
             screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
 
             fatigue_text = pytesseract.image_to_string(screenshot)
@@ -194,7 +195,7 @@ def watcher_function():
             print(f"Error in fatigue watcher: {e}")
     while watch_combat:
         try:
-            screenshot = pyautogui.screenshot()
+            screenshot = capture_screenshot()
             screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
 
             combat_tag = pytesseract.image_to_string(screenshot)
@@ -291,6 +292,22 @@ def get_cooldown():
     else:
         messagebox.showerror("Error", "Please enter a valid cooldown. Example: 1.5")
         return None
+    
+def find_window():
+    hwnd = win32gui.FindWindow(None, "Roblox")
+    if hwnd:
+        return hwnd
+    else:
+        print(f"Roblox window not found.")
+        return None
+    
+def capture_screenshot(hwnd):
+    rect = win32gui.GetWindowRect(hwnd)
+    left, top, right, bottom = rect
+    width = right - left
+    height = bottom - top
+    screenshot = pyautogui.screenshot(region=(left, top, width, height))
+    return screenshot
         
 
 def get_version_number():
