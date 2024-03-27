@@ -37,8 +37,16 @@ def click_stam_button():
     try:
         stam_button_location = pyautogui.locateCenterOnScreen(stam_button_path)
         if stam_button_location:
-            pyautogui.click(stam_button_location)
-            print("Clicked stamina.")
+            pyautogui.moveTo(stam_button_location, duration=0.5)
+
+            pyautogui.move(5, 5, duration=0.25)
+            pyautogui.move(-5, -5, duration=0.25)
+
+            time.sleep(0.5)
+
+            pyautogui.click()
+
+            print("Pressed stamina button.")
     except Exception as e:
         return
 
@@ -46,8 +54,16 @@ def click_speed_button():
     try:
         speed_button_location = pyautogui.locateCenterOnScreen(speed_button_path)
         if speed_button_location:
-            pyautogui.click(speed_button_location)
-            print("Clicked speed.")
+            pyautogui.moveTo(speed_button_location, duration=0.5)
+
+            pyautogui.move(5, 5, duration=0.25)
+            pyautogui.move(-5, -5, duration=0.25)
+
+            time.sleep(0.5)
+
+            pyautogui.click()
+
+            print("Pressed speed button.")
     except Exception as e:
         return
 
@@ -55,16 +71,24 @@ def click_start_button():
     try:
         start_button_location = pyautogui.locateCenterOnScreen(start_button_path)
         if start_button_location:
-            pyautogui.click(start_button_location)
-            print("Clicked start.")
+            pyautogui.moveTo(start_button_location, duration=0.5)
+
+            pyautogui.move(5, 5, duration=0.25)
+            pyautogui.move(-5, -5, duration=0.25)
+
+            time.sleep(0.5)
+
+            pyautogui.click()
+
+            print("Pressed start button.")
     except Exception as e:
         return
 
 def get_on_training():
     try:
         hold_e_button_location = pyautogui.locateCenterOnScreen(hold_e_button_path)
-        print(hold_e_button_location)
         if hold_e_button_location:
+            time.sleep(2)
             hold_key("e", 2)
             print("Got on training.")
             set_training_flag()
