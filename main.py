@@ -1,3 +1,4 @@
+import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
@@ -26,6 +27,7 @@ cooldown_period = 1.8
 last_pressed_timestamps = {key: 0 for key in keys}
 active_stat_farm = None
 active_job_farm = None
+is_training = False
 watch_fatigue = False
 watch_combat = False
 has_insomnia = False
@@ -37,10 +39,8 @@ def click_stam_button():
         if stam_button_location:
             pyautogui.click(stam_button_location)
             print("Clicked stamina.")
-        else:
-            return
     except Exception as e:
-        print(f"Error in click_stam_button: {e}")
+        return
 
 def click_speed_button():
     try:
@@ -48,10 +48,8 @@ def click_speed_button():
         if speed_button_location:
             pyautogui.click(speed_button_location)
             print("Clicked speed.")
-        else:
-            return
     except Exception as e:
-        print(f"Error in click_speed_button: {e}")
+        return
 
 def click_start_button():
     try:
@@ -59,10 +57,8 @@ def click_start_button():
         if start_button_location:
             pyautogui.click(start_button_location)
             print("Clicked start.")
-        else:
-            return
     except Exception as e:
-        print(f"Error in click_start_button: {e}")
+        return
 
 def get_on_training():
     try:
@@ -71,6 +67,7 @@ def get_on_training():
         if hold_e_button_location:
             hold_key("e", 2)
             print("Got on training.")
+            set_training_flag()
     except Exception as e:
         print(f"Error in get_on_training: {e}")
 
@@ -103,16 +100,11 @@ def hold_key(key, duration):
 
 def start_stat_farm():
     global active_stat_farm
-    global cooldown_period
     active_stat_farm = stat_type_var.get()
-    cooldown_period = get_cooldown()
 
-    if cooldown_period is not None:
-        stat_farm_thread = Thread(target=automate_stat_farm)
-        stat_farm_thread.daemon = True
-        stat_farm_thread.start()
-    else:
-        return
+    stat_farm_thread = Thread(target=automate_stat_farm)
+    stat_farm_thread.daemon = True
+    stat_farm_thread.start()
 
 def stop_stat_farm():
     global active_stat_farm
@@ -131,15 +123,18 @@ def stop_job_farm():
 
 def automate_stat_farm_main():
     if active_stat_farm == "stam":
-        #get_on_training()
+        if is_training == False:
+            get_on_training()
         click_stam_button()
         detect_and_press_keys()
     elif active_stat_farm == "speed":
-        #get_on_training()
+        if is_training == False:
+            get_on_training()
         click_speed_button()
         detect_and_press_keys()
     elif active_stat_farm == "pullup" or active_stat_farm == "bench":
-        #get_on_training()
+        if is_training == False:
+            get_on_training()
         click_start_button()
         detect_and_press_keys()
 
@@ -277,21 +272,6 @@ def send_to_webhook(alert_val):
     }
     
     requests.post(config['webhook_url'], data=json.dumps(payload), headers=headers)
-
-def validate_cooldown(value):
-    try:
-        float(value)
-        return True
-    except ValueError:
-        return False
-    
-def get_cooldown():
-    value = stat_delay_entry.get()
-    if validate_cooldown(value):
-        return float(value)
-    else:
-        messagebox.showerror("Error", "Please enter a valid cooldown. Example: 1.5")
-        return None
     
 def find_window():
     hwnd = win32gui.FindWindow(None, "Roblox")
@@ -310,6 +290,15 @@ def capture_screenshot():
     height = bottom - top
     screenshot = pyautogui.screenshot(region=(left, top, width, height))
     return screenshot
+
+def set_training_flag():
+    global is_training
+    is_training = True
+    threading.Timer(63, reset_training_flag).start()
+
+def reset_training_flag():
+    global is_training
+    is_training = False
         
 
 def get_version_number():
@@ -368,13 +357,8 @@ has_insomnia_var = tk.BooleanVar()
 stat_type_var = tk.StringVar()
 stat_type_label = ttk.Label(stat_auto, text="Choose Farm Type:")
 stat_type_combo = ttk.Combobox(stat_auto, textvariable=stat_type_var, values=["stam", "speed", "pullup", "bench"])
-stat_delay_label = ttk.Label(stat_auto, text="Enter your cooldown:")
-stat_delay_entry = tk.Entry(stat_auto)
 stat_start_button = ttk.Button(stat_auto, text="Start Farm", command=start_stat_farm)
 stat_stop_button = ttk.Button(stat_auto, text="Stop Farm", command=stop_stat_farm)
-
-validate_cooldown_cmd = root.register(validate_cooldown)
-stat_delay_entry.config(validate="key", validatecommand=(validate_cooldown_cmd, "%P"))
 
 job_type_var = tk.StringVar()
 job_type_label = ttk.Label(job_auto, text="Choose Farm Type:")
@@ -401,8 +385,6 @@ join_discord_button = ttk.Button(credits, text="Join Discord", command=join_disc
 
 stat_type_label.pack(pady=10)
 stat_type_combo.pack(pady=5)
-stat_delay_label.pack(pady=10)
-stat_delay_entry.pack(pady=5)
 stat_start_button.pack(pady=5)
 stat_stop_button.pack(pady=5)
 
