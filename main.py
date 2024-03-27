@@ -126,6 +126,8 @@ def start_stat_farm():
     global active_stat_farm
     active_stat_farm = stat_type_var.get()
 
+    focus_window()
+
     stat_farm_thread = Thread(target=automate_stat_farm)
     stat_farm_thread.daemon = True
     stat_farm_thread.start()
@@ -314,6 +316,14 @@ def capture_screenshot():
     height = bottom - top
     screenshot = pyautogui.screenshot(region=(left, top, width, height))
     return screenshot
+
+def focus_window():
+    hwnd = find_window()
+    if hwnd:
+        win32gui.ShowWindow(hwnd, 5)
+        win32gui.SetForegroundWindow(hwnd)
+    else:
+        print(f"Window '{hwnd}' not found.")
 
 def set_training_flag():
     global is_training
