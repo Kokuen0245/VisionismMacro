@@ -31,9 +31,6 @@ is_training = False
 watch_fatigue = False
 watch_combat = False
 has_insomnia = False
-start_stat_key = "<Control-s>"
-stop_stat_key = "<Control-t>"
-kill_macro_key = "<Control-r>"
 
 # Functions
 def click_stam_button():
@@ -337,46 +334,17 @@ def reset_training_flag():
     global is_training
     is_training = False
 
-def set_start_stat_key():
-    global start_stat_key
-    start_stat_key = start_stat_key_entry.get()
-    start_stat_key_label.config(text=start_stat_key)
-    unbind_key_events()
-    bind_key_events()
+def check_kill_macro(event):
+    if keyboard.is_pressed('ctrl') and event.name == 'r':
+        root.destroy()
 
-def set_stop_stat_key():
-    global stop_stat_key
-    stop_stat_key = stop_stat_key_entry.get()
-    stop_stat_key_label.config(text=stop_stat_key)
-    unbind_key_events()
-    bind_key_events()
-
-def set_kill_macro_key():
-    global kill_macro_key
-    kill_macro_key = kill_macro_key_entry.get()
-    kill_macro_key_label.config(text=kill_macro_key)
-    unbind_key_events()
-    bind_key_events()
-
-def on_start_stat_key_press(event):
-    if event.name == start_stat_key:
+def start_stat_farm_key(event):
+    if keyboard.is_pressed('ctrl') and event.name == 'g':
         start_stat_farm()
 
-def on_stop_stat_key_press(event):
-    if event.name == stop_stat_key:
+def stop_stat_farm_key(event):
+    if keyboard.is_pressed('ctrl') and event.name == 't':
         stop_stat_farm()
-
-def on_kill_macro_key_press(event):
-    if event.name == kill_macro_key:
-        exit()
-
-def bind_key_events():
-    keyboard.on_press(on_start_stat_key_press)
-    keyboard.on_press(on_stop_stat_key_press)
-    keyboard.on_press(on_kill_macro_key_press)
-
-def unbind_key_events():
-    keyboard.unhook_all()
 
 def get_version_number():
     version_url = "https://raw.githubusercontent.com/Kokuen0245/VisionismMacro/main/version.txt"
@@ -407,7 +375,9 @@ def join_discord():
 
 # Setup
 version = get_version_number()
-bind_key_events()
+keyboard.on_press_key('r', check_kill_macro)
+keyboard.on_press_key('g',  start_stat_farm_key)
+keyboard.on_press_key('t', stop_stat_farm_key)
 
 # UI
 root = tk.Tk()
@@ -459,13 +429,9 @@ save_button = ttk.Button(webhook, text="Save", command=lambda: save_webhook(webh
 test_button = ttk.Button(webhook, text="Test Webhook", command=lambda: test_webook())
 delete_button = ttk.Button(webhook, text="Delete Webhook", command=lambda: delete_webhook())
 
-start_stat_key_label = ttk.Label(keybinds, text="Current start keybind: " + start_stat_key)
-start_stat_key_entry = ttk.Entry(keybinds)
-stop_stat_key_label = ttk.Label(keybinds, text="Curerent stop keybind: " + stop_stat_key)
-stop_stat_key_entry = ttk.Entry(keybinds)
-kill_macro_key_label = ttk.Label(keybinds, text="Current kill macro keybind: " + kill_macro_key)
-kill_macro_key_entry = ttk.Entry(keybinds)
-set_keybinds_button = ttk.Button(keybinds, text="Set Keybinds", command=lambda: [set_start_stat_key(), set_stop_stat_key(), set_kill_macro_key()])
+start_stat_key_label = ttk.Label(keybinds, text="Current start keybind: Control + G")
+stop_stat_key_label = ttk.Label(keybinds, text="Current stop keybind: Control + T")
+kill_macro_key_label = ttk.Label(keybinds, text="Kill macro keybind: Control + R")
 
 credit_label_1 = ttk.Label(credits, text="Created by kokuen_.")
 credit_label_2 = ttk.Label(credits, text="Tested by rust3631")
@@ -495,12 +461,8 @@ test_button.pack(pady=5)
 delete_button.pack(pady=5)
 
 start_stat_key_label.pack(pady=5)
-start_stat_key_entry.pack(pady=5)
 stop_stat_key_label.pack(pady=5)
-stop_stat_key_entry.pack(pady=5)
 kill_macro_key_label.pack(pady=5)
-kill_macro_key_entry.pack(pady=5)
-set_keybinds_button.pack(pady=5)
 
 credit_label_1.pack(pady=5)
 credit_label_2.pack(pady=5)
