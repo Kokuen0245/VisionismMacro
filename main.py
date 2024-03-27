@@ -294,7 +294,7 @@ def capture_screenshot():
 def set_training_flag():
     global is_training
     is_training = True
-    threading.Timer(63, reset_training_flag).start()
+    threading.Timer(65, reset_training_flag).start()
 
 def reset_training_flag():
     global is_training
