@@ -86,7 +86,11 @@ def click_start_button():
 
 def get_on_training():
     try:
-        hold_e_button_location = pyautogui.locateCenterOnScreen(hold_e_button_path)
+        image = cv2.imread(hold_e_button_path)
+
+        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        hold_e_button_location = pyautogui.locateCenterOnScreen(gray_image, grayscale=True, threshold=0.8)
         if hold_e_button_location:
             time.sleep(2)
             hold_key("e", 2)
