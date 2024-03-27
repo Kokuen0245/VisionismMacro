@@ -90,7 +90,7 @@ def get_on_training():
 
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        hold_e_button_location = pyautogui.locateCenterOnScreen(gray_image, grayscale=True, threshold=0.8)
+        hold_e_button_location = pyautogui.locateCenterOnScreen(gray_image, grayscale=True, confidence=0.8)
         if hold_e_button_location:
             time.sleep(2)
             hold_key("e", 2)
