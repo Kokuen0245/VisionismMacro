@@ -407,6 +407,7 @@ def join_discord():
 
 # Setup
 version = get_version_number()
+bind_key_events()
 
 # UI
 root = tk.Tk()
